@@ -26,29 +26,40 @@ AgentRouter exposes an **Anthropic-compatible Messages protocol** at `/v1/messag
 
 ---
 
-## Installation & Reusing in Other Projects
+## Installation
 
-### Option A: Install in any project via pip
-You can install this library directly into any of your other Python projects or virtual environments:
-
+### Option 1: Install from Local Clone
 ```bash
-# From within another project:
-pip install d:/WORK/AgentRouter
+# Clone the repository and enter the directory
+git clone https://github.com/sinugowde/AgentRouter.git
+cd AgentRouter
 
-# Or editable mode (changes in AgentRouter reflect immediately):
-pip install -e d:/WORK/AgentRouter
+# Standard install
+pip install .
+
+# Or editable / development mode
+pip install -e .
+
+# With optional extras (e.g. LangChain, Anthropic SDK):
+pip install ".[langchain]"
+pip install ".[anthropic]"
+pip install ".[all]"
 ```
 
-### Option B: Optional Integrations
+### Option 2: Install Directly via Git
+Install straight into any project or virtual environment without manually cloning first:
 ```bash
-# With LangChain support:
-pip install "d:/WORK/AgentRouter[langchain]"
+pip install git+https://github.com/sinugowde/AgentRouter.git
 
-# With Anthropic SDK bridge:
-pip install "d:/WORK/AgentRouter[anthropic]"
+# With extras:
+pip install "agentrouter[langchain] @ git+https://github.com/sinugowde/AgentRouter.git"
+```
 
-# Everything:
-pip install "d:/WORK/AgentRouter[all]"
+### Option 3: Reference from Another Local Project
+If working locally across multiple projects without publishing to PyPI:
+```bash
+# Install as editable from your other project's folder:
+pip install -e /path/to/AgentRouter
 ```
 
 ---
@@ -272,7 +283,7 @@ Both `AgentRouter` and `AsyncAgentRouter` include **automatic exponential backof
 ## Project Structure
 
 ```
-d:\WORK\AgentRouter\
+AgentRouter/
 ├── agentrouter/
 │   ├── __init__.py           # Exports & version
 │   ├── client.py             # Sync AgentRouter client & MessagesResource

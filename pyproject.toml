@@ -10,8 +10,9 @@ readme = "README.md"
 requires-python = ">=3.8"
 license = {text = "MIT"}
 authors = [
-    {name = "AgentRouter Client"}
+    {name = "Shrinivas"}
 ]
+urls = {Homepage = "https://github.com/sinugowde/AgentRouter", Repository = "https://github.com/sinugowde/AgentRouter"}
 keywords = ["agentrouter", "llm", "ai", "gpt-6.1-sol", "gpt-6-astra", "anthropic", "langchain"]
 classifiers = [
     "Programming Language :: Python :: 3",
