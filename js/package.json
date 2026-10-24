@@ -1,0 +1,11 @@
+{
+  "name": "agentrouter",
+  "version": "0.1.0",
+  "description": "Client library for AgentRouter API (gpt-6.1-sol, gpt-6-astra, gpt-5.6-sol)",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "type": "module",
+  "keywords": ["agentrouter", "llm", "ai", "gpt-6.1-sol", "gpt-6-astra"],
+  "author": "",
+  "license": "MIT"
+}
