@@ -24,7 +24,7 @@ from .exceptions import (
 # Optional LangChain adapter
 try:
     from .langchain_adapter import ChatAgentRouter
-except ImportError:
+except Exception:
     ChatAgentRouter = None  # type: ignore
 
 __version__ = "0.1.0"
