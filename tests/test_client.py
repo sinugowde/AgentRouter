@@ -84,6 +84,55 @@ class TestAgentRouterMockedCalls(unittest.TestCase):
         chat.clear()
         self.assertEqual(len(chat.history), 0)
 
+    @patch("urllib.request.urlopen")
+    def test_models_service(self, mock_urlopen):
+        mock_response = MagicMock()
+        mock_response.read.return_value = json.dumps({
+            "data": [
+                {
+                    "id": "gpt-6.1-sol",
+                    "object": "model",
+                    "created": 1626777600,
+                    "owned_by": "custom",
+                    "supported_endpoint_types": ["openai"]
+                },
+                {
+                    "id": "gpt-6-astra",
+                    "object": "model",
+                    "created": 1626777600,
+                    "owned_by": "custom",
+                    "supported_endpoint_types": ["openai"]
+                }
+            ],
+            "success": True
+        }).encode("utf-8")
+        mock_urlopen.return_value.__enter__.return_value = mock_response
+
+        # Test raw
+        raw = self.client.models.raw()
+        self.assertTrue(raw["success"])
+
+        # Test list
+        models = self.client.models.list()
+        self.assertEqual(len(models), 2)
+        self.assertEqual(models[0].id, "gpt-6.1-sol")
+        self.assertEqual(models[0].owned_by, "custom")
+        self.assertEqual(models[0].supported_endpoint_types, ["openai"])
+
+        # Test ids
+        ids = self.client.models.ids()
+        self.assertIn("gpt-6.1-sol", ids)
+        self.assertIn("gpt-6-astra", ids)
+
+        # Test get
+        m = self.client.models.get("gpt-6.1-sol")
+        self.assertIsNotNone(m)
+        self.assertEqual(m.id, "gpt-6.1-sol")
+
+        # Test not found
+        missing = self.client.models.get("non-existent-model")
+        self.assertIsNone(missing)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -72,7 +72,10 @@ export class AgentRouter {
   };
 
   models: {
+    raw(): Promise<any>;
     list(): Promise<any[]>;
+    get(modelId: string): Promise<any | null>;
+    ids(): Promise<string[]>;
   };
 
   constructor(options?: AgentRouterOptions);

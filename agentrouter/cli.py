@@ -44,7 +44,18 @@ def main():
     parser.add_argument(
         "--list-models",
         action="store_true",
-        help="List available models supported by your subscription",
+        help="List available models and metadata supported by your subscription",
+    )
+    parser.add_argument(
+        "--model-info",
+        metavar="MODEL_ID",
+        default=None,
+        help="Get detailed metadata for a specific model ID (e.g. gpt-6.1-sol)",
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Output model listing or details as raw JSON",
     )
     parser.add_argument(
         "--api-key",
@@ -63,12 +74,39 @@ def main():
     try:
         client = AgentRouter(api_key=api_key)
 
+        if args.model_info:
+            if args.json:
+                import json
+                model = client.models.get(args.model_info)
+                if not model:
+                    print(json.dumps({"error": f"Model '{args.model_info}' not found"}), file=sys.stderr)
+                    sys.exit(1)
+                print(json.dumps(model.raw or model.to_dict(), indent=2))
+                return
+
+            model = client.models.get(args.model_info)
+            if not model:
+                print(f"Error: Model '{args.model_info}' not found.", file=sys.stderr)
+                sys.exit(1)
+            print(f"\nModel Details: {model.id}")
+            print(f"  - Object:              {model.object}")
+            print(f"  - Created:             {model.created_at or model.created}")
+            print(f"  - Owned By:            {model.owned_by}")
+            print(f"  - Supported Endpoints: {', '.join(model.supported_endpoint_types)}")
+            return
+
         if args.list_models:
-            print(f"Fetching available models from {client.base_url}...")
+            if args.json:
+                import json
+                raw_data = client.models.raw()
+                print(json.dumps(raw_data, indent=2))
+                return
+
             models = client.models.list()
-            print("\nAvailable Models:")
+            print(f"\nAvailable Models ({len(models)}):")
             for m in models:
-                print(f"  - {m.id}")
+                endpoints = ", ".join(m.supported_endpoint_types)
+                print(f"  - {m.id:<14} | Owned by: {m.owned_by or 'custom':<8} | Created: {m.created_at or m.created} | Endpoints: [{endpoints}]")
             return
 
         if args.interactive or not args.prompt:

@@ -41,7 +41,10 @@ export class AgentRouter {
     };
 
     this.models = {
+      raw: this._rawModels.bind(this),
       list: this._listModels.bind(this),
+      get: this._getModel.bind(this),
+      ids: this._listModelIds.bind(this),
     };
   }
 
@@ -206,9 +209,23 @@ export class AgentRouter {
     }
   }
 
+  async _rawModels() {
+    return await this._request("/v1/models", "GET");
+  }
+
   async _listModels() {
-    const data = await this._request("/v1/models", "GET");
+    const data = await this._rawModels();
     return data.data || [];
+  }
+
+  async _getModel(modelId) {
+    const models = await this._listModels();
+    return models.find((m) => m.id.toLowerCase() === modelId.toLowerCase()) || null;
+  }
+
+  async _listModelIds() {
+    const models = await this._listModels();
+    return models.map((m) => m.id);
   }
 
   async _request(path, method, body = null) {

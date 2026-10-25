@@ -104,12 +104,26 @@ class MessageResponse:
 
 @dataclass
 class ModelInfo:
-    """Information about an available model on AgentRouter."""
+    """Detailed information about an available model on AgentRouter."""
     id: str
     object: str = "model"
     created: Optional[int] = None
     owned_by: Optional[str] = None
-    supported_endpoints: List[str] = field(default_factory=list)
+    supported_endpoint_types: List[str] = field(default_factory=list)
+    raw: Dict[str, Any] = field(default_factory=dict)
+
+    @property
+    def supported_endpoints(self) -> List[str]:
+        """Alias for supported_endpoint_types."""
+        return self.supported_endpoint_types
+
+    @property
+    def created_at(self) -> Optional[str]:
+        """Human-readable UTC date/time string if created timestamp is present."""
+        if not self.created:
+            return None
+        import datetime
+        return datetime.datetime.fromtimestamp(self.created, tz=datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "ModelInfo":
@@ -118,5 +132,20 @@ class ModelInfo:
             object=data.get("object", "model"),
             created=data.get("created"),
             owned_by=data.get("owned_by"),
-            supported_endpoints=data.get("supported_endpoint_types", [])
+            supported_endpoint_types=data.get("supported_endpoint_types", []),
+            raw=data,
         )
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "id": self.id,
+            "object": self.object,
+            "created": self.created,
+            "created_at": self.created_at,
+            "owned_by": self.owned_by,
+            "supported_endpoint_types": self.supported_endpoint_types,
+        }
+
+    def __str__(self) -> str:
+        endpoints = ", ".join(self.supported_endpoint_types) or "none"
+        return f"Model(id='{self.id}', owned_by='{self.owned_by}', created={self.created}, endpoints=[{endpoints}])"

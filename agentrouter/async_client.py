@@ -7,7 +7,7 @@ import urllib.request
 import urllib.error
 from typing import List, Dict, Any, Optional, Union, AsyncIterator
 
-from .types import MessageResponse, ContentBlock
+from .types import MessageResponse, ContentBlock, ModelInfo
 from .exceptions import (
     AgentRouterError,
     AuthenticationError,
@@ -131,6 +131,45 @@ class AsyncMessagesResource:
             await threading_task
 
 
+class AsyncModelsResource:
+    """Async namespace for model operations."""
+
+    def __init__(self, client: "AsyncAgentRouter"):
+        self._client = client
+
+    async def raw(self) -> Dict[str, Any]:
+        """Fetch raw JSON from /v1/models."""
+        return await self._client._request("GET", "/v1/models")
+
+    async def list(self) -> List[ModelInfo]:
+        """Fetch all available models and their full metadata."""
+        try:
+            data = await self.raw()
+            raw_list = data.get("data", [])
+            return [ModelInfo.from_dict(m) for m in raw_list]
+        except Exception:
+            from .models_service import DEFAULT_MODELS
+            return [ModelInfo(id=m) for m in DEFAULT_MODELS]
+
+    async def get(self, model_id: str) -> Optional[ModelInfo]:
+        """Retrieve details for a specific model ID."""
+        models = await self.list()
+        for m in models:
+            if m.id.lower() == model_id.lower():
+                return m
+        return None
+
+    async def ids(self) -> List[str]:
+        """Fetch list of model IDs as plain strings."""
+        models = await self.list()
+        return [m.id for m in models]
+
+    async def is_available(self, model_id: str) -> bool:
+        """Check if a specific model ID is in the available model list."""
+        models = await self.list()
+        return any(m.id.lower() == model_id.lower() for m in models)
+
+
 class AsyncAgentRouter:
     """Asynchronous client for AgentRouter."""
 
@@ -156,6 +195,7 @@ class AsyncAgentRouter:
         self.user_agent = user_agent
 
         self.messages = AsyncMessagesResource(self)
+        self.models = AsyncModelsResource(self)
 
     async def chat(
         self,

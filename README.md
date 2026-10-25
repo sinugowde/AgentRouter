@@ -226,9 +226,42 @@ print(message.content[0].text)
 
 ---
 
+## Model Discovery & Inspection
+
+Query model metadata directly from AgentRouter (`/v1/models`):
+
+```python
+from agentrouter import AgentRouter
+
+client = AgentRouter()
+
+# 1. List all available models with metadata
+models = client.models.list()
+for m in models:
+    print(f"- {m.id} (Owner: {m.owned_by}, Created: {m.created_at}, Endpoints: {m.supported_endpoint_types})")
+
+# 2. Get specific model details
+model = client.models.get("gpt-6.1-sol")
+print(model.id)                       # 'gpt-6.1-sol'
+print(model.object)                   # 'model'
+print(model.created)                  # 1626777600
+print(model.created_at)               # '2021-07-20 10:40:00 UTC'
+print(model.supported_endpoint_types) # ['openai']
+
+# 3. Check availability
+if client.models.is_available("gpt-6-astra"):
+    print("gpt-6-astra is ready!")
+
+# 4. Raw API dictionary
+raw_json = client.models.raw()
+# {'data': [...], 'success': True}
+```
+
+---
+
 ## Command-Line Interface (CLI)
 
-Run single prompts, list models, or enter interactive chat directly from your terminal:
+Run single prompts, list models, inspect model metadata, or enter interactive chat directly from your terminal:
 
 ```bash
 # Single prompt
@@ -237,8 +270,14 @@ python -m agentrouter "Who created Linux?" --model gpt-6-astra
 # Interactive chat shell
 python -m agentrouter -i --model gpt-6.1-sol
 
-# List available models
+# List available models with details
 python -m agentrouter --list-models
+
+# Output raw JSON list of models (matches curl /v1/models output)
+python -m agentrouter --list-models --json
+
+# Get details for a specific model
+python -m agentrouter --model-info gpt-6.1-sol
 ```
 
 ---
